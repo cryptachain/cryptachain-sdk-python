@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "cryptachain"
-version = "0.1.0"
+version = "0.1.1"
 description = "Official Python SDK for the CryptaChain API — blockchain data, pricing, FX, screening"
 readme = "README.md"
 license = "MIT"
