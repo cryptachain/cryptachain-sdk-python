@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from datetime import date
 
-import pytest
 
 from tests.conftest import create_test_client
 
@@ -23,10 +22,34 @@ MOCK_FX_HISTORY = {
     "fromDate": "2026-04-01",
     "toDate": "2026-04-04",
     "rates": [
-        {"currency": "EUR", "date": "2026-04-01", "rate": 1.0810, "source": "FRANKFURTER_ECB", "isBusinessDay": True},
-        {"currency": "EUR", "date": "2026-04-02", "rate": 1.0825, "source": "FRANKFURTER_ECB", "isBusinessDay": True},
-        {"currency": "EUR", "date": "2026-04-03", "rate": 1.0830, "source": "FRANKFURTER_ECB", "isBusinessDay": True},
-        {"currency": "EUR", "date": "2026-04-04", "rate": 1.0832, "source": "FRANKFURTER_ECB", "isBusinessDay": True},
+        {
+            "currency": "EUR",
+            "date": "2026-04-01",
+            "rate": 1.0810,
+            "source": "FRANKFURTER_ECB",
+            "isBusinessDay": True,
+        },
+        {
+            "currency": "EUR",
+            "date": "2026-04-02",
+            "rate": 1.0825,
+            "source": "FRANKFURTER_ECB",
+            "isBusinessDay": True,
+        },
+        {
+            "currency": "EUR",
+            "date": "2026-04-03",
+            "rate": 1.0830,
+            "source": "FRANKFURTER_ECB",
+            "isBusinessDay": True,
+        },
+        {
+            "currency": "EUR",
+            "date": "2026-04-04",
+            "rate": 1.0832,
+            "source": "FRANKFURTER_ECB",
+            "isBusinessDay": True,
+        },
     ],
 }
 
@@ -45,7 +68,13 @@ MOCK_CURRENCIES = {
     "currencies": [
         {"code": "EUR", "name": "Euro", "source": "FRANKFURTER_ECB", "peggedToUsd": False},
         {"code": "GBP", "name": "British Pound", "source": "FRANKFURTER_ECB", "peggedToUsd": False},
-        {"code": "USDT", "name": "Tether", "source": "HARDCODED_PEG", "peggedToUsd": True, "pegRatio": 1.0},
+        {
+            "code": "USDT",
+            "name": "Tether",
+            "source": "HARDCODED_PEG",
+            "peggedToUsd": True,
+            "pegRatio": 1.0,
+        },
     ],
     "count": 3,
 }
@@ -56,9 +85,11 @@ class TestFxResource:
 
     def test_get_rate(self) -> None:
         """get_rate returns an FxRate."""
-        client = create_test_client({
-            "/v1/fx/rate": MOCK_FX_RATE,
-        })
+        client = create_test_client(
+            {
+                "/v1/fx/rate": MOCK_FX_RATE,
+            }
+        )
         result = client.fx.get_rate("EUR", "USD", date(2026, 4, 4))
         assert result.rate == 1.0832
         assert result.source == "FRANKFURTER_ECB"
@@ -66,9 +97,11 @@ class TestFxResource:
 
     def test_get_history(self) -> None:
         """get_history returns FxHistoryResponse with daily rates."""
-        client = create_test_client({
-            "/v1/fx/history": MOCK_FX_HISTORY,
-        })
+        client = create_test_client(
+            {
+                "/v1/fx/history": MOCK_FX_HISTORY,
+            }
+        )
         result = client.fx.get_history("EUR", from_date="2026-04-01", to_date="2026-04-04")
         assert result.currency == "EUR"
         assert len(result.rates) == 4
@@ -76,9 +109,11 @@ class TestFxResource:
 
     def test_get_monthly_average(self) -> None:
         """get_monthly_average returns IAS 21 monthly average."""
-        client = create_test_client({
-            "/v1/fx/monthly-average": MOCK_MONTHLY_AVG,
-        })
+        client = create_test_client(
+            {
+                "/v1/fx/monthly-average": MOCK_MONTHLY_AVG,
+            }
+        )
         result = client.fx.get_monthly_average("EUR", 2026, 4)
         assert result.average_rate == 1.0824
         assert result.business_days == 22
@@ -87,9 +122,11 @@ class TestFxResource:
 
     def test_list_currencies(self) -> None:
         """list_currencies returns all supported currencies."""
-        client = create_test_client({
-            "/v1/fx/currencies": MOCK_CURRENCIES,
-        })
+        client = create_test_client(
+            {
+                "/v1/fx/currencies": MOCK_CURRENCIES,
+            }
+        )
         result = client.fx.list_currencies()
         assert result.count == 3
         assert len(result.currencies) == 3

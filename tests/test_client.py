@@ -6,15 +6,13 @@ import httpx
 import pytest
 
 from cryptachain import (
-    AsyncCryptaChain,
     AuthenticationError,
     CryptaChain,
-    CryptaChainError,
     QuotaExceededError,
     RateLimitError,
 )
-from cryptachain.errors import NotFoundError, ServerError, ValidationError
-from tests.conftest import create_test_client, make_mock_transport
+from cryptachain.errors import NotFoundError, ServerError
+from tests.conftest import create_test_client
 
 
 class TestCryptaChainClient:
@@ -39,25 +37,31 @@ class TestCryptaChainClient:
 
     def test_401_raises_authentication_error(self) -> None:
         """401 responses raise AuthenticationError."""
-        client = create_test_client({
-            "/v1/status/services": (401, {"message": "Invalid API key"}),
-        })
+        client = create_test_client(
+            {
+                "/v1/status/services": (401, {"message": "Invalid API key"}),
+            }
+        )
         with pytest.raises(AuthenticationError, match="Invalid API key"):
             client.health.get_system_status()
 
     def test_402_raises_quota_exceeded_error(self) -> None:
         """402 responses raise QuotaExceededError."""
-        client = create_test_client({
-            "/v1/prices/by-symbol": (402, {"message": "Quota exceeded"}),
-        })
+        client = create_test_client(
+            {
+                "/v1/prices/by-symbol": (402, {"message": "Quota exceeded"}),
+            }
+        )
         with pytest.raises(QuotaExceededError, match="Quota exceeded"):
             client.prices.by_symbol("BTC")
 
     def test_404_raises_not_found_error(self) -> None:
         """404 responses raise NotFoundError."""
-        client = create_test_client({
-            "/v1/tokens/DOESNOTEXIST": (404, {"message": "Token not found"}),
-        })
+        client = create_test_client(
+            {
+                "/v1/tokens/DOESNOTEXIST": (404, {"message": "Token not found"}),
+            }
+        )
         with pytest.raises(NotFoundError, match="Token not found"):
             client.tokens.get_metadata("DOESNOTEXIST")
 
@@ -130,6 +134,7 @@ class TestCryptaChainClient:
     def test_headers_include_api_key(self) -> None:
         """Verify that X-API-Key header is set."""
         from cryptachain.config import Config
+
         config = Config(api_key="my-secret-key")
         headers = config.get_headers()
         assert headers["X-API-Key"] == "my-secret-key"

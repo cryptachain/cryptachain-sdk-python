@@ -34,9 +34,7 @@ class AuthenticationError(CryptaChainError):
 class QuotaExceededError(CryptaChainError):
     """Raised on 402 Payment Required — API quota exhausted."""
 
-    def __init__(
-        self, message: str = "API quota exceeded", **kwargs: object
-    ) -> None:
+    def __init__(self, message: str = "API quota exceeded", **kwargs: object) -> None:
         super().__init__(message, status_code=402, **kwargs)  # type: ignore[arg-type]
 
 

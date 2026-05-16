@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
 
 from tests.conftest import create_test_client
 
@@ -73,9 +72,11 @@ class TestWalletResource:
 
     def test_get_balances(self) -> None:
         """get_balances returns parsed WalletBalances."""
-        client = create_test_client({
-            "/v1/wallets/0xABC/balances": MOCK_BALANCES,
-        })
+        client = create_test_client(
+            {
+                "/v1/wallets/0xABC/balances": MOCK_BALANCES,
+            }
+        )
         result = client.wallets.get_balances("0xABC", chain="ethereum")
         assert result.total_value_usd == 6000.00
         assert len(result.items) == 2
@@ -84,9 +85,11 @@ class TestWalletResource:
 
     def test_get_history(self) -> None:
         """get_history returns parsed WalletHistory."""
-        client = create_test_client({
-            "/v1/wallets/0xABC/transfers": MOCK_TRANSFERS,
-        })
+        client = create_test_client(
+            {
+                "/v1/wallets/0xABC/transfers": MOCK_TRANSFERS,
+            }
+        )
         result = client.wallets.get_history("0xABC", chain="ethereum")
         assert result.total == 1
         assert result.has_more is False
@@ -95,51 +98,63 @@ class TestWalletResource:
 
     def test_iter_all_transfers(self) -> None:
         """iter_all_transfers yields Transfer objects from paginated results."""
-        client = create_test_client({
-            "/v1/wallets/0xABC/transfers": MOCK_TRANSFERS,
-        })
+        client = create_test_client(
+            {
+                "/v1/wallets/0xABC/transfers": MOCK_TRANSFERS,
+            }
+        )
         transfers = list(client.wallets.iter_all_transfers("0xABC", chain="ethereum"))
         assert len(transfers) == 1
         assert transfers[0].tx_hash == "0xabc123"
 
     def test_get_native_balance(self) -> None:
         """get_native_balance returns NativeBalance."""
-        client = create_test_client({
-            "/v1/wallets/0xABC/native-balance": MOCK_NATIVE_BALANCE,
-        })
+        client = create_test_client(
+            {
+                "/v1/wallets/0xABC/native-balance": MOCK_NATIVE_BALANCE,
+            }
+        )
         result = client.wallets.get_native_balance("0xABC", chain="ethereum")
         assert result.balance_formatted == 2.0
         assert result.symbol == "ETH"
 
     def test_get_erc20_transfers(self) -> None:
         """get_erc20_transfers returns WalletHistory."""
-        client = create_test_client({
-            "/v1/wallets/0xABC/erc20-transfers": MOCK_TRANSFERS,
-        })
+        client = create_test_client(
+            {
+                "/v1/wallets/0xABC/erc20-transfers": MOCK_TRANSFERS,
+            }
+        )
         result = client.wallets.get_erc20_transfers("0xABC", chain="ethereum")
         assert len(result.items) == 1
 
     def test_get_nft_transfers(self) -> None:
         """get_nft_transfers returns WalletHistory."""
-        client = create_test_client({
-            "/v1/wallets/0xABC/nft-transfers": MOCK_TRANSFERS,
-        })
+        client = create_test_client(
+            {
+                "/v1/wallets/0xABC/nft-transfers": MOCK_TRANSFERS,
+            }
+        )
         result = client.wallets.get_nft_transfers("0xABC", chain="ethereum")
         assert len(result.items) == 1
 
     def test_get_native_transfers(self) -> None:
         """get_native_transfers returns WalletHistory."""
-        client = create_test_client({
-            "/v1/wallets/0xABC/native-transfers": MOCK_TRANSFERS,
-        })
+        client = create_test_client(
+            {
+                "/v1/wallets/0xABC/native-transfers": MOCK_TRANSFERS,
+            }
+        )
         result = client.wallets.get_native_transfers("0xABC", chain="ethereum")
         assert len(result.items) == 1
 
     def test_get_summary(self) -> None:
         """get_summary returns WalletSummary."""
-        client = create_test_client({
-            "/v1/wallets/0xABC/summary": MOCK_SUMMARY,
-        })
+        client = create_test_client(
+            {
+                "/v1/wallets/0xABC/summary": MOCK_SUMMARY,
+            }
+        )
         result = client.wallets.get_summary("0xABC", chain="ethereum")
         assert result.total_transactions == 5000
         assert result.is_contract is False

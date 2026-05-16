@@ -15,7 +15,7 @@ from cryptachain.resources.prices import AsyncPriceResource, PriceResource
 from cryptachain.resources.screening import AsyncScreeningResource, ScreeningResource
 from cryptachain.resources.tokens import AsyncTokenResource, TokenResource
 from cryptachain.resources.wallets import AsyncWalletResource, WalletResource
-from cryptachain.retry import async_execute_with_retry, execute_with_retry, raise_for_status
+from cryptachain.retry import async_execute_with_retry, execute_with_retry
 
 
 class HttpClient:
@@ -43,13 +43,16 @@ class HttpClient:
         Returns:
             Parsed JSON response as a dictionary.
         """
+
         def _request() -> httpx.Response:
             return self._client.get(path, params=params)
 
         response = execute_with_retry(self._config, _request)
         return response.json()  # type: ignore[no-any-return]
 
-    def post(self, path: str, json: Any = None, params: dict[str, Any] | None = None) -> dict[str, Any]:
+    def post(
+        self, path: str, json: Any = None, params: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         """Send a POST request and return parsed JSON.
 
         Args:
@@ -60,6 +63,7 @@ class HttpClient:
         Returns:
             Parsed JSON response as a dictionary.
         """
+
         def _request() -> httpx.Response:
             return self._client.post(path, json=json, params=params)
 
@@ -92,13 +96,16 @@ class AsyncHttpClient:
         Returns:
             Parsed JSON response as a dictionary.
         """
+
         async def _request() -> httpx.Response:
             return await self._client.get(path, params=params)
 
         response = await async_execute_with_retry(self._config, _request)
         return response.json()  # type: ignore[no-any-return]
 
-    async def post(self, path: str, json: Any = None, params: dict[str, Any] | None = None) -> dict[str, Any]:
+    async def post(
+        self, path: str, json: Any = None, params: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         """Send an async POST request and return parsed JSON.
 
         Args:
@@ -109,6 +116,7 @@ class AsyncHttpClient:
         Returns:
             Parsed JSON response as a dictionary.
         """
+
         async def _request() -> httpx.Response:
             return await self._client.post(path, json=json, params=params)
 
