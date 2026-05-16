@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
 
 from tests.conftest import create_test_client
 
@@ -56,9 +55,11 @@ class TestPriceResource:
 
     def test_by_symbol(self) -> None:
         """by_symbol returns a PriceResponse with v2.3 fields."""
-        client = create_test_client({
-            "/v1/prices/by-symbol": MOCK_PRICE,
-        })
+        client = create_test_client(
+            {
+                "/v1/prices/by-symbol": MOCK_PRICE,
+            }
+        )
         result = client.prices.by_symbol("BTC", date="2026-04-04", currency="EUR")
         assert result.symbol == "BTC"
         assert result.price == 78500.50
@@ -72,9 +73,11 @@ class TestPriceResource:
 
     def test_by_contract(self) -> None:
         """by_contract returns a PriceResponse."""
-        client = create_test_client({
-            "/v1/prices/by-contract": MOCK_PRICE,
-        })
+        client = create_test_client(
+            {
+                "/v1/prices/by-contract": MOCK_PRICE,
+            }
+        )
         result = client.prices.by_contract(
             "ethereum",
             "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
@@ -84,22 +87,28 @@ class TestPriceResource:
 
     def test_batch(self) -> None:
         """batch returns multiple price results."""
-        client = create_test_client({
-            ("POST", "/v1/prices/batch"): MOCK_BATCH,
-        })
-        result = client.prices.batch([
-            {"symbol": "BTC", "date": "2026-04-04", "currency": "EUR"},
-            {"symbol": "ETH", "date": "2026-04-04", "currency": "EUR"},
-        ])
+        client = create_test_client(
+            {
+                ("POST", "/v1/prices/batch"): MOCK_BATCH,
+            }
+        )
+        result = client.prices.batch(
+            [
+                {"symbol": "BTC", "date": "2026-04-04", "currency": "EUR"},
+                {"symbol": "ETH", "date": "2026-04-04", "currency": "EUR"},
+            ]
+        )
         assert len(result.results) == 2
         assert result.results[0].symbol == "BTC"
         assert result.results[1].symbol == "ETH"
 
     def test_at_timestamp(self) -> None:
         """at returns a PriceResponse for a specific timestamp."""
-        client = create_test_client({
-            "/v1/prices/at": MOCK_PRICE,
-        })
+        client = create_test_client(
+            {
+                "/v1/prices/at": MOCK_PRICE,
+            }
+        )
         result = client.prices.at("BTC", timestamp=1712236800)
         assert result.symbol == "BTC"
         assert result.price == 78500.50

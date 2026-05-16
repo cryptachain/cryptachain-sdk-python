@@ -2,13 +2,12 @@
 
 from __future__ import annotations
 
-import json
 from typing import Any
 
 import httpx
 import pytest
 
-from cryptachain import AsyncCryptaChain, CryptaChain
+from cryptachain import CryptaChain
 
 
 def make_mock_transport(routes: dict[str, Any]) -> httpx.MockTransport:

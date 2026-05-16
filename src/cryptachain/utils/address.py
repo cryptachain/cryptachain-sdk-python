@@ -33,7 +33,16 @@ def normalize_address(address: str, chain: str | None = None) -> str:
         The normalized address.
     """
     # Non-EVM chains are case-sensitive — never lowercase
-    non_evm_chains = {"tron", "solana", "bitcoin", "btc", "cosmos", "litecoin", "dogecoin", "ripple"}
+    non_evm_chains = {
+        "tron",
+        "solana",
+        "bitcoin",
+        "btc",
+        "cosmos",
+        "litecoin",
+        "dogecoin",
+        "ripple",
+    }
     if chain and chain.lower() in non_evm_chains:
         return address
 

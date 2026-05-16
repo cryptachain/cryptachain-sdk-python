@@ -30,7 +30,7 @@ def _calculate_delay(attempt: int, config: Config, retry_after: float | None = N
     """Calculate the delay before the next retry attempt."""
     if retry_after is not None:
         return retry_after
-    delay = config.retry_base_delay * (2 ** attempt)
+    delay = config.retry_base_delay * (2**attempt)
     delay = min(delay, config.retry_max_delay)
     # Add jitter: +/- 25%
     jitter = delay * 0.25
@@ -116,7 +116,9 @@ def execute_with_retry(
                 delay = _calculate_delay(attempt, config)
                 time.sleep(delay)
                 continue
-            raise CryptaChainError(f"Request failed after {config.max_retries + 1} attempts: {exc}") from exc
+            raise CryptaChainError(
+                f"Request failed after {config.max_retries + 1} attempts: {exc}"
+            ) from exc
         except CryptaChainError as exc:
             if exc.status_code in _NON_RETRYABLE_STATUS_CODES:
                 raise
@@ -128,7 +130,9 @@ def execute_with_retry(
                 continue
             raise
 
-    raise CryptaChainError(f"Request failed after {config.max_retries + 1} attempts") from last_exception
+    raise CryptaChainError(
+        f"Request failed after {config.max_retries + 1} attempts"
+    ) from last_exception
 
 
 async def async_execute_with_retry(
@@ -168,7 +172,9 @@ async def async_execute_with_retry(
                 delay = _calculate_delay(attempt, config)
                 await asyncio.sleep(delay)
                 continue
-            raise CryptaChainError(f"Request failed after {config.max_retries + 1} attempts: {exc}") from exc
+            raise CryptaChainError(
+                f"Request failed after {config.max_retries + 1} attempts: {exc}"
+            ) from exc
         except CryptaChainError as exc:
             if exc.status_code in _NON_RETRYABLE_STATUS_CODES:
                 raise
@@ -180,4 +186,6 @@ async def async_execute_with_retry(
                 continue
             raise
 
-    raise CryptaChainError(f"Request failed after {config.max_retries + 1} attempts") from last_exception
+    raise CryptaChainError(
+        f"Request failed after {config.max_retries + 1} attempts"
+    ) from last_exception
