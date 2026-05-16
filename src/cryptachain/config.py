@@ -32,7 +32,7 @@ class Config:
             "X-API-Key": self.api_key,
             "Content-Type": "application/json",
             "Accept": "application/json",
-            "User-Agent": "cryptachain-python/0.1.0",
+            "User-Agent": "cryptachain-python/0.1.1",
         }
         base.update(self.headers)
         return base

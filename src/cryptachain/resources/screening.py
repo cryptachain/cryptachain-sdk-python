@@ -38,7 +38,7 @@ class ScreeningResource:
         params: dict[str, Any] = {"address": address}
         if chain is not None:
             params["chain_id"] = resolve_chain(chain)
-        data = self._http.get("/api/v1/screen/address", params=params)
+        data = self._http.get("/v1/screen/address", params=params)
         return ScreeningResult.model_validate(data)
 
     def screen_bulk(
@@ -53,7 +53,7 @@ class ScreeningResource:
         Returns:
             BulkScreeningResult with individual results and summary counts.
         """
-        data = self._http.post("/api/v1/screen/bulk", json={"addresses": addresses})
+        data = self._http.post("/v1/screen/bulk", json={"addresses": addresses})
         return BulkScreeningResult.model_validate(data)
 
 
@@ -76,7 +76,7 @@ class AsyncScreeningResource:
         params: dict[str, Any] = {"address": address}
         if chain is not None:
             params["chain_id"] = resolve_chain(chain)
-        data = await self._http.get("/api/v1/screen/address", params=params)
+        data = await self._http.get("/v1/screen/address", params=params)
         return ScreeningResult.model_validate(data)
 
     async def screen_bulk(
@@ -84,5 +84,5 @@ class AsyncScreeningResource:
         addresses: list[dict[str, Any]],
     ) -> BulkScreeningResult:
         """Screen multiple addresses in a single request."""
-        data = await self._http.post("/api/v1/screen/bulk", json={"addresses": addresses})
+        data = await self._http.post("/v1/screen/bulk", json={"addresses": addresses})
         return BulkScreeningResult.model_validate(data)
