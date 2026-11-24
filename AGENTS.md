@@ -8,4 +8,6 @@ Rules for anyone (human or automated agent) changing this public SDK repository.
 4. **No external uploads, registrations or submissions without explicit approval.** Publishing to a package registry, registering a namespace, submitting to a directory or any other third-party service needs explicit approval from the maintainer first.
 5. **No browser automation of a maintainer's own logged-in browser.**
 6. **Least privilege in CI.** Every workflow declares `permissions` explicitly (read-only by default); only the publish job gets `id-token: write`.
-7. **Public history only.** Commit messages, code comments, tests and docs must be understandable and appropriate for the public.
+7. **No pull requests, branches or Dependabot updates before the history is verified clean.** Pull requests keep their commits reachable forever (`refs/pull/*`), so nothing is opened on a public repo until a full-history audit (secrets, internal names, commit messages) is clean. Only `master` exists; Dependabot version and security updates stay off (alerts stay on).
+8. **Publishing is a separate approval.** Fix the release tooling (for Java: the `release` Maven profile) first, audit the exact artifacts that will be uploaded, and publish only with the maintainer's explicit OK.
+9. **Public history only.** Commit messages, code comments, tests and docs must be understandable and appropriate for the public.
