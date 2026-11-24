@@ -1,32 +1,50 @@
 name: Publish to PyPI
 
+# Runs only when a GitHub release is published (tag vX.Y.Z).
+# Trusted publishing (OIDC): no tokens or secrets are used.
 on:
   release:
     types: [published]
 
-permissions:
-  id-token: write
+permissions: {}
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/cryptachain
-
+      url: https://pypi.org/project/cryptachain/
+    permissions:
+      id-token: write
+      contents: read
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: "3.12"
 
-      - name: Install build tools
-        run: python -m pip install --upgrade pip build
+      - name: Build sdist and wheel
+        run: |
+          python -m pip install --upgrade pip build
+          python -m build
 
-      - name: Build package
-        run: python -m build
+      - name: Check release tag equals package version
+        run: |
+          python - <<'PY'
+          import glob, os, sys, tomllib
+          with open("pyproject.toml", "rb") as f:
+              version = tomllib.load(f)["project"]["version"]
+          tag = os.environ["GITHUB_REF_NAME"]
+          if tag != f"v{version}":
+              sys.exit(f"tag {tag!r} does not match pyproject version v{version}")
+          files = sorted(os.path.basename(p) for p in glob.glob("dist/*"))
+          want = {f"cryptachain-{version}.tar.gz", f"cryptachain-{version}-py3-none-any.whl"}
+          if set(files) != want:
+              sys.exit(f"dist/ is {files}, expected {sorted(want)}")
+          print(f"OK: {tag} == v{version}; dist = {files}")
+          PY
 
       - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # release/v1
