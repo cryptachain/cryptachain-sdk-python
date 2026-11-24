@@ -4,9 +4,7 @@ from __future__ import annotations
 
 from datetime import date
 
-
 from tests.conftest import create_test_client
-
 
 MOCK_FX_RATE = {
     "currency": "EUR",

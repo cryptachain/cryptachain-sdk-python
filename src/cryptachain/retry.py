@@ -44,7 +44,7 @@ def raise_for_status(response: httpx.Response) -> None:
 
     try:
         body = response.json()
-    except Exception:
+    except ValueError:  # invalid JSON / undecodable body
         body = None
 
     message = ""
@@ -81,7 +81,7 @@ def raise_for_status(response: httpx.Response) -> None:
 
 def execute_with_retry(
     config: Config,
-    request_fn: "callable",  # type: ignore[valid-type]
+    request_fn: callable,  # type: ignore[valid-type]
 ) -> httpx.Response:
     """Execute a sync request with retry logic.
 
@@ -137,7 +137,7 @@ def execute_with_retry(
 
 async def async_execute_with_retry(
     config: Config,
-    request_fn: "callable",  # type: ignore[valid-type]
+    request_fn: callable,  # type: ignore[valid-type]
 ) -> httpx.Response:
     """Execute an async request with retry logic.
 

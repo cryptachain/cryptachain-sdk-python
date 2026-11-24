@@ -69,13 +69,13 @@ def mock_client(request: pytest.FixtureRequest) -> CryptaChain:
     client._config = config
     client._http = http_client
 
-    from cryptachain.resources.wallets import WalletResource
-    from cryptachain.resources.prices import PriceResource
+    from cryptachain.resources.blockchain import BlockchainResource
     from cryptachain.resources.fx import FxResource
+    from cryptachain.resources.health import HealthResource
+    from cryptachain.resources.prices import PriceResource
     from cryptachain.resources.screening import ScreeningResource
     from cryptachain.resources.tokens import TokenResource
-    from cryptachain.resources.blockchain import BlockchainResource
-    from cryptachain.resources.health import HealthResource
+    from cryptachain.resources.wallets import WalletResource
 
     client.wallets = WalletResource(http_client)
     client.prices = PriceResource(http_client)
@@ -106,13 +106,13 @@ def create_test_client(routes: dict[str, Any]) -> CryptaChain:
     client._config = config
     client._http = http_client
 
-    from cryptachain.resources.wallets import WalletResource
-    from cryptachain.resources.prices import PriceResource
+    from cryptachain.resources.blockchain import BlockchainResource
     from cryptachain.resources.fx import FxResource
+    from cryptachain.resources.health import HealthResource
+    from cryptachain.resources.prices import PriceResource
     from cryptachain.resources.screening import ScreeningResource
     from cryptachain.resources.tokens import TokenResource
-    from cryptachain.resources.blockchain import BlockchainResource
-    from cryptachain.resources.health import HealthResource
+    from cryptachain.resources.wallets import WalletResource
 
     client.wallets = WalletResource(http_client)
     client.prices = PriceResource(http_client)

@@ -25,10 +25,10 @@ dependencies = [
 [project.optional-dependencies]
 pandas = ["pandas>=2.0"]
 async = ["httpx[http2]"]
-dev = ["pytest", "pytest-asyncio", "mypy", "ruff", "respx"]
+dev = ["pytest", "pytest-asyncio", "mypy", "ruff==0.17.6", "respx"]
 
 [project.urls]
-Documentation = "https://docs.cryptachain.com/sdk/python"
+Documentation = "https://github.com/cryptachain/cryptachain-sdk-python#readme"
 Repository = "https://github.com/cryptachain/cryptachain-sdk-python"
 
 [tool.hatch.build.targets.wheel]

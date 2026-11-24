@@ -5,6 +5,8 @@ from __future__ import annotations
 from datetime import datetime
 from enum import Enum
 
+from pydantic import Field
+
 from cryptachain.types.common import CamelModel
 
 
@@ -72,5 +74,5 @@ class BatchPriceRequest(CamelModel):
 class BatchPriceResponse(CamelModel):
     """Response from the batch price endpoint."""
 
-    results: list[PriceResponse] = []
+    results: list[PriceResponse] = Field(default_factory=list)
     errors: list[dict] | None = None  # type: ignore[type-arg]

@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from datetime import datetime
 
+from pydantic import Field
+
 from cryptachain.types.common import CamelModel
 
 
@@ -24,7 +26,7 @@ class FxHistoryResponse(CamelModel):
     currency: str
     from_date: str
     to_date: str
-    rates: list[FxRate] = []
+    rates: list[FxRate] = Field(default_factory=list)
 
 
 class FxMonthlyAverageResponse(CamelModel):
@@ -53,5 +55,5 @@ class CurrencyInfo(CamelModel):
 class CurrenciesResponse(CamelModel):
     """List of all supported currencies."""
 
-    currencies: list[CurrencyInfo] = []
+    currencies: list[CurrencyInfo] = Field(default_factory=list)
     count: int = 0

@@ -5,6 +5,8 @@ from __future__ import annotations
 from datetime import datetime
 from enum import Enum
 
+from pydantic import Field
+
 from cryptachain.types.common import CamelModel
 
 
@@ -35,13 +37,13 @@ class ScreeningResult(CamelModel):
     risk_level: RiskLevel = RiskLevel.UNKNOWN
     risk_score: float | None = None
     sanctions_match: bool = False
-    flags: list[ScreeningFlag] = []
+    flags: list[ScreeningFlag] = Field(default_factory=list)
     screened_at: datetime | None = None
 
 
 class BulkScreeningResult(CamelModel):
     """Results from bulk address screening."""
 
-    results: list[ScreeningResult] = []
+    results: list[ScreeningResult] = Field(default_factory=list)
     total: int = 0
     flagged: int = 0

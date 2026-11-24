@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from datetime import datetime
 
+from pydantic import Field
+
 from cryptachain.types.common import CamelModel
 
 
@@ -39,7 +41,7 @@ class Transfer(CamelModel):
 class WalletHistory(CamelModel):
     """Paginated list of wallet transfers."""
 
-    items: list[Transfer] = []
+    items: list[Transfer] = Field(default_factory=list)
     cursor: str | None = None
     has_more: bool = False
     total: int | None = None
@@ -59,7 +61,7 @@ class TokenBalance(CamelModel):
 class WalletBalances(CamelModel):
     """All token balances for a wallet."""
 
-    items: list[TokenBalance] = []
+    items: list[TokenBalance] = Field(default_factory=list)
     total_value_usd: float | None = None
 
 

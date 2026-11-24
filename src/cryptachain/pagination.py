@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Any, AsyncIterator, Iterator, TypeVar
+from collections.abc import AsyncIterator, Iterator
+from typing import Any, TypeVar
 
 from pydantic import BaseModel
 
@@ -19,7 +20,7 @@ class PaginatedResponse(BaseModel):
 
 
 def iter_pages(
-    fetch_fn: "callable",  # type: ignore[valid-type]
+    fetch_fn: callable,  # type: ignore[valid-type]
     params: dict[str, Any],
     item_key: str = "items",
     cursor_key: str = "cursor",
@@ -49,7 +50,7 @@ def iter_pages(
 
 
 async def async_iter_pages(
-    fetch_fn: "callable",  # type: ignore[valid-type]
+    fetch_fn: callable,  # type: ignore[valid-type]
     params: dict[str, Any],
     item_key: str = "items",
     cursor_key: str = "cursor",

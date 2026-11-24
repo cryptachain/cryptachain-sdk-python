@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-
 from tests.conftest import create_test_client
-
 
 MOCK_BALANCES = {
     "items": [

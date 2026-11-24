@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from datetime import datetime
 
+from pydantic import Field
+
 from cryptachain.types.common import CamelModel
 
 
@@ -42,7 +44,7 @@ class LogEntry(CamelModel):
 
     log_index: int
     address: str
-    topics: list[str] = []
+    topics: list[str] = Field(default_factory=list)
     data: str | None = None
 
 
@@ -55,7 +57,7 @@ class Receipt(CamelModel):
     gas_used: int | None = None
     effective_gas_price: str | None = None
     contract_address: str | None = None
-    logs: list[LogEntry] = []
+    logs: list[LogEntry] = Field(default_factory=list)
 
 
 class Trace(CamelModel):

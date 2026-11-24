@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from types import TracebackType
-from typing import Any, Type
+from typing import Any
 
 import httpx
 
@@ -177,12 +177,12 @@ class CryptaChain:
         """Close the underlying HTTP client and release resources."""
         self._http.close()
 
-    def __enter__(self) -> CryptaChain:
+    def __enter__(self) -> CryptaChain:  # noqa: PYI034 - typing.Self needs Python 3.11, package supports 3.10
         return self
 
     def __exit__(
         self,
-        exc_type: Type[BaseException] | None,
+        exc_type: type[BaseException] | None,
         exc_val: BaseException | None,
         exc_tb: TracebackType | None,
     ) -> None:
@@ -234,12 +234,12 @@ class AsyncCryptaChain:
         """Close the underlying async HTTP client and release resources."""
         await self._http.close()
 
-    async def __aenter__(self) -> AsyncCryptaChain:
+    async def __aenter__(self) -> AsyncCryptaChain:  # noqa: PYI034 - typing.Self needs Python 3.11, package supports 3.10
         return self
 
     async def __aexit__(
         self,
-        exc_type: Type[BaseException] | None,
+        exc_type: type[BaseException] | None,
         exc_val: BaseException | None,
         exc_tb: TracebackType | None,
     ) -> None:
