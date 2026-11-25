@@ -39,7 +39,7 @@ class TestCryptaChainClient:
         """401 responses raise AuthenticationError."""
         client = create_test_client(
             {
-                "/v1/status/services": (401, {"message": "Invalid API key"}),
+                "/v1/status": (401, {"message": "Invalid API key"}),
             }
         )
         with pytest.raises(AuthenticationError, match="Invalid API key"):
@@ -49,7 +49,7 @@ class TestCryptaChainClient:
         """402 responses raise QuotaExceededError."""
         client = create_test_client(
             {
-                "/v1/prices/by-symbol": (402, {"message": "Quota exceeded"}),
+                "/v1/prices/BTC/fair-value": (402, {"message": "Quota exceeded"}),
             }
         )
         with pytest.raises(QuotaExceededError, match="Quota exceeded"):
@@ -59,7 +59,7 @@ class TestCryptaChainClient:
         """404 responses raise NotFoundError."""
         client = create_test_client(
             {
-                "/v1/tokens/DOESNOTEXIST": (404, {"message": "Token not found"}),
+                "/v1/prices/tokens/DOESNOTEXIST": (404, {"message": "Token not found"}),
             }
         )
         with pytest.raises(NotFoundError, match="Token not found"):
@@ -97,7 +97,7 @@ class TestCryptaChainClient:
         )
 
         with pytest.raises(RateLimitError):
-            http_client.get("/v1/prices/by-symbol", params={"symbol": "BTC"})
+            http_client.get("/v1/prices/BTC/fair-value", params={"symbol": "BTC"})
 
         # Should have retried once (2 total attempts)
         assert call_count == 2
@@ -129,7 +129,7 @@ class TestCryptaChainClient:
         )
 
         with pytest.raises(ServerError):
-            http_client.get("/v1/status/services")
+            http_client.get("/v1/status")
 
     def test_headers_include_api_key(self) -> None:
         """Verify that X-API-Key header is set."""

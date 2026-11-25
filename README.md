@@ -81,9 +81,6 @@ erc20 = client.wallets.get_erc20_transfers("0xABC...", chain="ethereum")
 nft = client.wallets.get_nft_transfers("0xABC...", chain="ethereum")
 native_txs = client.wallets.get_native_transfers("0xABC...", chain="ethereum")
 
-# Wallet summary
-summary = client.wallets.get_summary("0xABC...", chain="ethereum")
-
 # Export to pandas DataFrame (requires cryptachain[pandas])
 df = client.wallets.to_dataframe("0xABC...", chain="ethereum")
 ```
@@ -97,14 +94,12 @@ price = client.prices.by_symbol("BTC", date="2026-04-04", currency="EUR")
 # By contract address
 price = client.prices.by_contract("ethereum", "0xA0b86991c...", date="2026-04-04")
 
-# Batch (up to 500)
-batch = client.prices.batch([
-    {"symbol": "BTC", "date": "2026-04-04", "currency": "EUR"},
-    {"symbol": "ETH", "date": "2026-04-04", "currency": "EUR"},
-])
+# Batch: up to 500 symbols for one date (GET /v1/prices/batch); result.prices maps symbol -> price
+batch = client.prices.batch(["BTC", "ETH"], "2026-04-04", currency="EUR")
+print(batch.prices["BTC"].price)
 
 # At exact timestamp (1-minute precision)
-price = client.prices.at("ETH", timestamp=1712236800)
+price = client.prices.at("ETH", timestamp="2024-04-04T12:00:00Z")  # epoch seconds and datetime also accepted
 ```
 
 ### FX Rates
@@ -135,8 +130,8 @@ if result.sanctions_match:
 
 # Bulk screening
 bulk = client.screening.screen_bulk([
-    {"address": "0xABC...", "chain_id": 1},
-    {"address": "0xDEF...", "chain_id": 137},
+    {"address": "0xABC...", "chain": "ethereum"},
+    {"address": "0xDEF...", "chain": "polygon"},
 ])
 ```
 

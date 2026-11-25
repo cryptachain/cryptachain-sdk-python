@@ -4,18 +4,14 @@ from cryptachain.types.blockchain import Block, LogEntry, Receipt, Trace, Transa
 from cryptachain.types.common import Address, CamelModel, Chain, Pagination
 from cryptachain.types.fx import (
     CurrenciesResponse,
-    CurrencyInfo,
+    FxHistoryPoint,
     FxHistoryResponse,
     FxMonthlyAverageResponse,
     FxRate,
 )
 from cryptachain.types.price import (
-    BatchPriceRequest,
     BatchPriceResponse,
-    FairValueLevel,
-    FxSource,
     PriceResponse,
-    PriceSource,
 )
 from cryptachain.types.screening import (
     BulkScreeningResult,
@@ -37,24 +33,20 @@ from cryptachain.types.wallet import (
 __all__ = [
     "Address",
     "Asset",
-    "BatchPriceRequest",
     "BatchPriceResponse",
     "Block",
     "BulkScreeningResult",
     "CamelModel",
     "Chain",
     "CurrenciesResponse",
-    "CurrencyInfo",
-    "FairValueLevel",
+    "FxHistoryPoint",
     "FxHistoryResponse",
     "FxMonthlyAverageResponse",
     "FxRate",
-    "FxSource",
     "LogEntry",
     "NativeBalance",
     "Pagination",
     "PriceResponse",
-    "PriceSource",
     "Receipt",
     "RiskLevel",
     "ScreeningFlag",

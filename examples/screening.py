@@ -25,20 +25,19 @@ else:
 # Bulk screening
 print("\n--- Bulk Screening ---\n")
 bulk_result = client.screening.screen_bulk([
-    {"address": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045", "chain_id": 1},
-    {"address": "0xABC0000000000000000000000000000000000001", "chain_id": 1},
-    {"address": "0xDEF0000000000000000000000000000000000002", "chain_id": 137},
+    {"address": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045", "chain": "ethereum"},
+    {"address": "0xABC0000000000000000000000000000000000001", "chain": "ethereum"},
+    {"address": "0xDEF0000000000000000000000000000000000002", "chain": "polygon"},
 ])
 
-print(f"Screened: {bulk_result.total}")
-print(f"Flagged: {bulk_result.flagged}")
+print(f"Screened: {len(bulk_result)}")
 
-for r in bulk_result.results:
+for r in bulk_result:
     status = "FLAGGED" if r.sanctions_match else "CLEAN"
     print(f"  {r.address[:10]}... => {status} (risk: {r.risk_level})")
 
 # Check for high-risk addresses
-high_risk = [r for r in bulk_result.results if r.risk_level in (RiskLevel.HIGH, RiskLevel.CRITICAL)]
+high_risk = [r for r in bulk_result if r.risk_level in (RiskLevel.HIGH, RiskLevel.CRITICAL)]
 if high_risk:
     print(f"\n{len(high_risk)} HIGH/CRITICAL risk addresses found!")
 

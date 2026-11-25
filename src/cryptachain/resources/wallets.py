@@ -11,9 +11,8 @@ from cryptachain.types.wallet import (
     Transfer,
     WalletBalances,
     WalletHistory,
-    WalletSummary,
 )
-from cryptachain.utils.chain import resolve_chain
+from cryptachain.utils.chain import resolve_chain_slug
 
 if TYPE_CHECKING:
     from cryptachain.client import AsyncHttpClient, HttpClient
@@ -49,7 +48,7 @@ class WalletResource:
         """
         params: dict[str, Any] = {"limit": limit}
         if chain is not None:
-            params["chain_id"] = resolve_chain(chain)
+            params["chain"] = resolve_chain_slug(chain)
         if cursor is not None:
             params["cursor"] = cursor
         data = self._http.get(f"/v1/wallets/{address}/transfers", params=params)
@@ -74,7 +73,7 @@ class WalletResource:
         """
         params: dict[str, Any] = {}
         if chain is not None:
-            params["chain_id"] = resolve_chain(chain)
+            params["chain"] = resolve_chain_slug(chain)
 
         def fetch(p: dict[str, Any]) -> dict[str, Any]:
             return self._http.get(f"/v1/wallets/{address}/transfers", params=p)
@@ -99,7 +98,7 @@ class WalletResource:
         """
         params: dict[str, Any] = {}
         if chain is not None:
-            params["chain_id"] = resolve_chain(chain)
+            params["chain"] = resolve_chain_slug(chain)
         data = self._http.get(f"/v1/wallets/{address}/balances", params=params)
         return WalletBalances.model_validate(data)
 
@@ -120,7 +119,7 @@ class WalletResource:
         """
         params: dict[str, Any] = {}
         if chain is not None:
-            params["chain_id"] = resolve_chain(chain)
+            params["chain"] = resolve_chain_slug(chain)
         data = self._http.get(f"/v1/wallets/{address}/native-balance", params=params)
         return NativeBalance.model_validate(data)
 
@@ -145,7 +144,7 @@ class WalletResource:
         """
         params: dict[str, Any] = {"limit": limit}
         if chain is not None:
-            params["chain_id"] = resolve_chain(chain)
+            params["chain"] = resolve_chain_slug(chain)
         if cursor is not None:
             params["cursor"] = cursor
         data = self._http.get(f"/v1/wallets/{address}/erc20-transfers", params=params)
@@ -172,7 +171,7 @@ class WalletResource:
         """
         params: dict[str, Any] = {"limit": limit}
         if chain is not None:
-            params["chain_id"] = resolve_chain(chain)
+            params["chain"] = resolve_chain_slug(chain)
         if cursor is not None:
             params["cursor"] = cursor
         data = self._http.get(f"/v1/wallets/{address}/nft-transfers", params=params)
@@ -199,32 +198,11 @@ class WalletResource:
         """
         params: dict[str, Any] = {"limit": limit}
         if chain is not None:
-            params["chain_id"] = resolve_chain(chain)
+            params["chain"] = resolve_chain_slug(chain)
         if cursor is not None:
             params["cursor"] = cursor
         data = self._http.get(f"/v1/wallets/{address}/native-transfers", params=params)
         return WalletHistory.model_validate(data)
-
-    def get_summary(
-        self,
-        address: str,
-        *,
-        chain: str | int | None = None,
-    ) -> WalletSummary:
-        """Get a summary for a wallet address.
-
-        Args:
-            address: Wallet address.
-            chain: Chain name or chain ID.
-
-        Returns:
-            WalletSummary with aggregate information.
-        """
-        params: dict[str, Any] = {}
-        if chain is not None:
-            params["chain_id"] = resolve_chain(chain)
-        data = self._http.get(f"/v1/wallets/{address}/summary", params=params)
-        return WalletSummary.model_validate(data)
 
     def to_dataframe(
         self,
@@ -299,7 +277,7 @@ class AsyncWalletResource:
         """
         params: dict[str, Any] = {"limit": limit}
         if chain is not None:
-            params["chain_id"] = resolve_chain(chain)
+            params["chain"] = resolve_chain_slug(chain)
         if cursor is not None:
             params["cursor"] = cursor
         data = await self._http.get(f"/v1/wallets/{address}/transfers", params=params)
@@ -324,7 +302,7 @@ class AsyncWalletResource:
         """
         params: dict[str, Any] = {}
         if chain is not None:
-            params["chain_id"] = resolve_chain(chain)
+            params["chain"] = resolve_chain_slug(chain)
 
         async def fetch(p: dict[str, Any]) -> dict[str, Any]:
             return await self._http.get(f"/v1/wallets/{address}/transfers", params=p)
@@ -349,7 +327,7 @@ class AsyncWalletResource:
         """
         params: dict[str, Any] = {}
         if chain is not None:
-            params["chain_id"] = resolve_chain(chain)
+            params["chain"] = resolve_chain_slug(chain)
         data = await self._http.get(f"/v1/wallets/{address}/balances", params=params)
         return WalletBalances.model_validate(data)
 
@@ -370,7 +348,7 @@ class AsyncWalletResource:
         """
         params: dict[str, Any] = {}
         if chain is not None:
-            params["chain_id"] = resolve_chain(chain)
+            params["chain"] = resolve_chain_slug(chain)
         data = await self._http.get(f"/v1/wallets/{address}/native-balance", params=params)
         return NativeBalance.model_validate(data)
 
@@ -385,7 +363,7 @@ class AsyncWalletResource:
         """Get ERC-20 token transfers only."""
         params: dict[str, Any] = {"limit": limit}
         if chain is not None:
-            params["chain_id"] = resolve_chain(chain)
+            params["chain"] = resolve_chain_slug(chain)
         if cursor is not None:
             params["cursor"] = cursor
         data = await self._http.get(f"/v1/wallets/{address}/erc20-transfers", params=params)
@@ -402,7 +380,7 @@ class AsyncWalletResource:
         """Get NFT transfers only."""
         params: dict[str, Any] = {"limit": limit}
         if chain is not None:
-            params["chain_id"] = resolve_chain(chain)
+            params["chain"] = resolve_chain_slug(chain)
         if cursor is not None:
             params["cursor"] = cursor
         data = await self._http.get(f"/v1/wallets/{address}/nft-transfers", params=params)
@@ -419,24 +397,11 @@ class AsyncWalletResource:
         """Get native coin transfers only."""
         params: dict[str, Any] = {"limit": limit}
         if chain is not None:
-            params["chain_id"] = resolve_chain(chain)
+            params["chain"] = resolve_chain_slug(chain)
         if cursor is not None:
             params["cursor"] = cursor
         data = await self._http.get(f"/v1/wallets/{address}/native-transfers", params=params)
         return WalletHistory.model_validate(data)
-
-    async def get_summary(
-        self,
-        address: str,
-        *,
-        chain: str | int | None = None,
-    ) -> WalletSummary:
-        """Get a summary for a wallet address."""
-        params: dict[str, Any] = {}
-        if chain is not None:
-            params["chain_id"] = resolve_chain(chain)
-        data = await self._http.get(f"/v1/wallets/{address}/summary", params=params)
-        return WalletSummary.model_validate(data)
 
     async def to_dataframe(
         self,

@@ -1,198 +1,95 @@
-"""Price resource — symbol, contract, batch, and at-timestamp lookups."""
+"""Price resource: fair-value lookups on the routes the API serves."""
 
 from __future__ import annotations
 
+from datetime import date as date_type
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
 
 from cryptachain.types.price import BatchPriceResponse, PriceResponse
-from cryptachain.utils.chain import resolve_chain
+from cryptachain.utils.chain import resolve_chain_slug
 
 if TYPE_CHECKING:
     from cryptachain.client import AsyncHttpClient, HttpClient
 
 
-class PriceResource:
-    """Synchronous price operations.
+def _day_params(date: date_type | str | None, currency: str) -> dict[str, Any]:
+    params: dict[str, Any] = {"currency": currency}
+    if date is not None:
+        params["date"] = str(date)
+    return params
 
-    Access via ``client.prices``.
-    """
+
+def _iso(timestamp: str | int | datetime) -> str:
+    """ISO-8601 UTC text for epoch seconds, a datetime or text."""
+    if isinstance(timestamp, int):
+        return datetime.fromtimestamp(timestamp, tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    if isinstance(timestamp, datetime):
+        return timestamp.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return timestamp
+
+
+def _batch(symbols: list[str], date: date_type | str, currency: str) -> tuple[str, dict[str, Any]]:
+    if not 1 <= len(symbols) <= 500:
+        raise ValueError("batch takes 1 to 500 symbols")
+    return "/v1/prices/batch", {"symbols": ",".join(symbols), "date": str(date), "currency": currency}
+
+
+def _batch_result(data: dict[str, Any]) -> BatchPriceResponse:
+    return BatchPriceResponse(prices={k: PriceResponse.model_validate(v) for k, v in data.items()})
+
+
+class PriceResource:
+    """Synchronous price operations. Access via ``client.prices``."""
 
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def by_symbol(
-        self,
-        symbol: str,
-        *,
-        date: str | None = None,
-        currency: str = "USD",
-    ) -> PriceResponse:
-        """Get the price for a token by its symbol.
-
-        Args:
-            symbol: Token symbol, e.g. "BTC", "ETH".
-            date: Date string (YYYY-MM-DD). Defaults to latest.
-            currency: Target currency code (default "USD").
-
-        Returns:
-            PriceResponse with v2.3 P11 shape including quality_score and fair_value_level.
-        """
-        params: dict[str, Any] = {"symbol": symbol, "currency": currency}
-        if date is not None:
-            params["date"] = date
-        data = self._http.get("/v1/prices/by-symbol", params=params)
+    def by_symbol(self, symbol: str, *, date: date_type | str | None = None, currency: str = "USD") -> PriceResponse:
+        """``GET /v1/prices/{symbol}/fair-value`` (latest day when ``date`` is omitted)."""
+        data = self._http.get(f"/v1/prices/{symbol}/fair-value", params=_day_params(date, currency))
         return PriceResponse.model_validate(data)
 
     def by_contract(
-        self,
-        chain: str | int,
-        address: str,
-        *,
-        date: str | None = None,
-        currency: str = "USD",
+        self, chain: str | int, address: str, *, date: date_type | str | None = None, currency: str = "USD"
     ) -> PriceResponse:
-        """Get the price for a token by its contract address.
-
-        Args:
-            chain: Chain name or chain ID.
-            address: Token contract address.
-            date: Date string (YYYY-MM-DD). Defaults to latest.
-            currency: Target currency code (default "USD").
-
-        Returns:
-            PriceResponse with pricing and quality metadata.
-        """
-        params: dict[str, Any] = {
-            "chain_id": resolve_chain(chain),
-            "address": address,
-            "currency": currency,
-        }
-        if date is not None:
-            params["date"] = date
-        data = self._http.get("/v1/prices/by-contract", params=params)
+        """``GET /v1/prices/by-contract/{chain}/{address}/fair-value``; ``chain`` is a slug or a known chain id."""
+        slug = resolve_chain_slug(chain)
+        data = self._http.get(f"/v1/prices/by-contract/{slug}/{address}/fair-value", params=_day_params(date, currency))
         return PriceResponse.model_validate(data)
 
-    def batch(
-        self,
-        requests: list[dict[str, Any]],
-    ) -> BatchPriceResponse:
-        """Get prices for multiple tokens in a single request.
+    def batch(self, symbols: list[str], date: date_type | str, *, currency: str = "USD") -> BatchPriceResponse:
+        """``GET /v1/prices/batch``: up to 500 symbols for one date. Symbols with no price are absent."""
+        path, params = _batch(symbols, date, currency)
+        return _batch_result(self._http.get(path, params=params))
 
-        Args:
-            requests: List of price request dicts. Each may contain:
-                symbol, chain_id, address, date, timestamp, currency.
-                Maximum 500 items per request.
-
-        Returns:
-            BatchPriceResponse with results and any errors.
-        """
-        data = self._http.post("/v1/prices/batch", json={"requests": requests})
-        return BatchPriceResponse.model_validate(data)
-
-    def at(
-        self,
-        symbol: str,
-        *,
-        timestamp: int,
-        currency: str = "USD",
-    ) -> PriceResponse:
-        """Get the price at a specific Unix timestamp (1-minute precision).
-
-        Args:
-            symbol: Token symbol, e.g. "BTC".
-            timestamp: Unix timestamp in seconds.
-            currency: Target currency code (default "USD").
-
-        Returns:
-            PriceResponse for the closest available minute.
-        """
-        params: dict[str, Any] = {
-            "symbol": symbol,
-            "timestamp": timestamp,
-            "currency": currency,
-        }
-        data = self._http.get("/v1/prices/at", params=params)
+    def at(self, symbol: str, timestamp: str | int | datetime, *, currency: str = "USD") -> PriceResponse:
+        """``GET /v1/prices/{symbol}/at``: price at an ISO-8601 timestamp (daily fallback when no minute price)."""
+        data = self._http.get(f"/v1/prices/{symbol}/at", params={"timestamp": _iso(timestamp), "currency": currency})
         return PriceResponse.model_validate(data)
 
 
 class AsyncPriceResource:
-    """Asynchronous price operations.
-
-    Access via ``client.prices`` on an ``AsyncCryptaChain`` instance.
-    """
+    """Asynchronous price operations."""
 
     def __init__(self, http: AsyncHttpClient) -> None:
         self._http = http
 
-    async def by_symbol(
-        self,
-        symbol: str,
-        *,
-        date: str | None = None,
-        currency: str = "USD",
-    ) -> PriceResponse:
-        """Get the price for a token by its symbol.
-
-        Args:
-            symbol: Token symbol, e.g. "BTC", "ETH".
-            date: Date string (YYYY-MM-DD). Defaults to latest.
-            currency: Target currency code (default "USD").
-
-        Returns:
-            PriceResponse with v2.3 P11 shape.
-        """
-        params: dict[str, Any] = {"symbol": symbol, "currency": currency}
-        if date is not None:
-            params["date"] = date
-        data = await self._http.get("/v1/prices/by-symbol", params=params)
+    async def by_symbol(self, symbol: str, *, date: date_type | str | None = None, currency: str = "USD") -> PriceResponse:
+        data = await self._http.get(f"/v1/prices/{symbol}/fair-value", params=_day_params(date, currency))
         return PriceResponse.model_validate(data)
 
     async def by_contract(
-        self,
-        chain: str | int,
-        address: str,
-        *,
-        date: str | None = None,
-        currency: str = "USD",
+        self, chain: str | int, address: str, *, date: date_type | str | None = None, currency: str = "USD"
     ) -> PriceResponse:
-        """Get the price for a token by its contract address."""
-        params: dict[str, Any] = {
-            "chain_id": resolve_chain(chain),
-            "address": address,
-            "currency": currency,
-        }
-        if date is not None:
-            params["date"] = date
-        data = await self._http.get("/v1/prices/by-contract", params=params)
+        slug = resolve_chain_slug(chain)
+        data = await self._http.get(f"/v1/prices/by-contract/{slug}/{address}/fair-value", params=_day_params(date, currency))
         return PriceResponse.model_validate(data)
 
-    async def batch(
-        self,
-        requests: list[dict[str, Any]],
-    ) -> BatchPriceResponse:
-        """Get prices for multiple tokens in a single request.
+    async def batch(self, symbols: list[str], date: date_type | str, *, currency: str = "USD") -> BatchPriceResponse:
+        path, params = _batch(symbols, date, currency)
+        return _batch_result(await self._http.get(path, params=params))
 
-        Args:
-            requests: List of price request dicts (max 500).
-
-        Returns:
-            BatchPriceResponse with results and any errors.
-        """
-        data = await self._http.post("/v1/prices/batch", json={"requests": requests})
-        return BatchPriceResponse.model_validate(data)
-
-    async def at(
-        self,
-        symbol: str,
-        *,
-        timestamp: int,
-        currency: str = "USD",
-    ) -> PriceResponse:
-        """Get the price at a specific Unix timestamp (1-minute precision)."""
-        params: dict[str, Any] = {
-            "symbol": symbol,
-            "timestamp": timestamp,
-            "currency": currency,
-        }
-        data = await self._http.get("/v1/prices/at", params=params)
+    async def at(self, symbol: str, timestamp: str | int | datetime, *, currency: str = "USD") -> PriceResponse:
+        data = await self._http.get(f"/v1/prices/{symbol}/at", params={"timestamp": _iso(timestamp), "currency": currency})
         return PriceResponse.model_validate(data)

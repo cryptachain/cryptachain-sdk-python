@@ -1,4 +1,4 @@
-"""Token metadata types."""
+"""Token record type, as recorded from ``GET /v1/prices/tokens/{symbol}``."""
 
 from __future__ import annotations
 
@@ -6,16 +6,13 @@ from cryptachain.types.common import CamelModel
 
 
 class TokenMetadata(CamelModel):
-    """Token metadata information."""
+    """A token of the price registry."""
 
+    token_id: int
     symbol: str
     name: str | None = None
-    decimals: int | None = None
-    contract_address: str | None = None
-    chain_id: int | None = None
-    logo_url: str | None = None
+    category: str | None = None  # e.g. LAYER1, STABLECOIN, DEFI
+    previous_symbols: list[str] | None = None
+    is_active: bool = True
+    is_delisted: bool = False
     coingecko_id: str | None = None
-    token_type: str | None = None  # ERC20, ERC721, NATIVE
-    total_supply: str | None = None
-    market_cap_usd: float | None = None
-    website: str | None = None

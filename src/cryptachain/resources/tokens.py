@@ -26,9 +26,9 @@ class TokenResource:
             symbol: Token symbol, e.g. "BTC", "ETH", "USDC".
 
         Returns:
-            TokenMetadata with name, decimals, contract info, and more.
+            TokenMetadata with name, category, previous symbols and CoinGecko id.
         """
-        data = self._http.get(f"/v1/tokens/{symbol}")
+        data = self._http.get(f"/v1/prices/tokens/{symbol}")
         return TokenMetadata.model_validate(data)
 
 
@@ -43,5 +43,5 @@ class AsyncTokenResource:
 
     async def get_metadata(self, symbol: str) -> TokenMetadata:
         """Get metadata for a token by symbol."""
-        data = await self._http.get(f"/v1/tokens/{symbol}")
+        data = await self._http.get(f"/v1/prices/tokens/{symbol}")
         return TokenMetadata.model_validate(data)

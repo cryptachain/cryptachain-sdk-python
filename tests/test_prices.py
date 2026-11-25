@@ -1,112 +1,51 @@
-"""Tests for the price resource."""
+"""Price resource: routes and bodies recorded from the live API."""
 
 from __future__ import annotations
 
-from tests.conftest import create_test_client
+import pytest
 
-MOCK_PRICE = {
-    "symbol": "BTC",
-    "date": "2026-04-04",
-    "currency": "EUR",
-    "price": 78500.50,
-    "priceUsd": 85000.00,
-    "fxRate": 0.9235,
-    "fxSource": "FRANKFURTER_ECB",
-    "fxDate": "2026-04-04",
-    "source": "CRYPTAPRICE_VWAP",
-    "qualityScore": 95,
-    "fairValueLevel": "LEVEL_1",
-    "sourceCount": 5,
-    "methodologyVersion": "2.3",
-    "stablecoinPegged": False,
-    "manualOverride": False,
-    "computedAt": "2026-04-04T12:00:00Z",
-}
-
-MOCK_BATCH = {
-    "results": [
-        {
-            "symbol": "BTC",
-            "date": "2026-04-04",
-            "currency": "EUR",
-            "price": 78500.50,
-            "priceUsd": 85000.00,
-            "source": "CRYPTAPRICE_VWAP",
-            "qualityScore": 95,
-        },
-        {
-            "symbol": "ETH",
-            "date": "2026-04-04",
-            "currency": "EUR",
-            "price": 2800.25,
-            "priceUsd": 3032.00,
-            "source": "CRYPTAPRICE_VWAP",
-            "qualityScore": 92,
-        },
-    ],
-    "errors": None,
-}
+from tests.recorded import fixture, recording_client
 
 
-class TestPriceResource:
-    """Test suite for price operations."""
+def test_by_symbol_calls_fair_value_route() -> None:
+    client, seen = recording_client({"/v1/prices/BTC/fair-value": fixture("price_usd")})
+    p = client.prices.by_symbol("BTC", date="2026-11-10")
+    assert seen == [("GET", "/v1/prices/BTC/fair-value", {"currency": "USD", "date": "2026-11-10"})]
+    assert p.currency == "USD" and p.fair_value_level == 1 and p.close_final == "UNKNOWN" and p.fx_rate is None
 
-    def test_by_symbol(self) -> None:
-        """by_symbol returns a PriceResponse with v2.3 fields."""
-        client = create_test_client(
-            {
-                "/v1/prices/by-symbol": MOCK_PRICE,
-            }
-        )
-        result = client.prices.by_symbol("BTC", date="2026-04-04", currency="EUR")
-        assert result.symbol == "BTC"
-        assert result.price == 78500.50
-        assert result.currency == "EUR"
-        assert result.quality_score == 95
-        assert result.fair_value_level is not None
-        assert result.fair_value_level.value == "LEVEL_1"
-        assert result.source is not None
-        assert result.source.value == "CRYPTAPRICE_VWAP"
-        assert result.stablecoin_pegged is False
 
-    def test_by_contract(self) -> None:
-        """by_contract returns a PriceResponse."""
-        client = create_test_client(
-            {
-                "/v1/prices/by-contract": MOCK_PRICE,
-            }
-        )
-        result = client.prices.by_contract(
-            "ethereum",
-            "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-            date="2026-04-04",
-        )
-        assert result.price == 78500.50
+def test_currency_returns_fx_fields() -> None:
+    client, seen = recording_client({"/v1/prices/ETH/fair-value": fixture("price_eur")})
+    p = client.prices.by_symbol("ETH", date="2026-11-10", currency="EUR")
+    assert seen[0][2]["currency"] == "EUR"
+    assert p.fx_source == "ECB" and p.fx_rate == 1.1
 
-    def test_batch(self) -> None:
-        """batch returns multiple price results."""
-        client = create_test_client(
-            {
-                ("POST", "/v1/prices/batch"): MOCK_BATCH,
-            }
-        )
-        result = client.prices.batch(
-            [
-                {"symbol": "BTC", "date": "2026-04-04", "currency": "EUR"},
-                {"symbol": "ETH", "date": "2026-04-04", "currency": "EUR"},
-            ]
-        )
-        assert len(result.results) == 2
-        assert result.results[0].symbol == "BTC"
-        assert result.results[1].symbol == "ETH"
 
-    def test_at_timestamp(self) -> None:
-        """at returns a PriceResponse for a specific timestamp."""
-        client = create_test_client(
-            {
-                "/v1/prices/at": MOCK_PRICE,
-            }
-        )
-        result = client.prices.at("BTC", timestamp=1712236800)
-        assert result.symbol == "BTC"
-        assert result.price == 78500.50
+def test_by_contract_uses_chain_slug() -> None:
+    a = "0xdac17f958d2ee523a2206206994597c13d831ec7"
+    body = fixture("price_usd")
+    client, seen = recording_client(
+        {f"/v1/prices/by-contract/{c}/{a}/fair-value": body for c in ("ethereum", "bsc")}
+    )
+    client.prices.by_contract("ethereum", a, date="2026-11-10")
+    client.prices.by_contract(56, a, date="2026-11-10")
+    assert seen[0][1] == f"/v1/prices/by-contract/ethereum/{a}/fair-value"
+    assert seen[1][1] == f"/v1/prices/by-contract/bsc/{a}/fair-value"
+    with pytest.raises(ValueError):
+        client.prices.by_contract(999999, a)
+
+
+def test_batch_is_a_get_with_symbols_and_returns_a_map() -> None:
+    client, seen = recording_client({"/v1/prices/batch": fixture("price_batch")})
+    r = client.prices.batch(["BTC", "NOPE"], "2026-11-10", currency="EUR")
+    assert seen == [("GET", "/v1/prices/batch", {"symbols": "BTC,NOPE", "date": "2026-11-10", "currency": "EUR"})]
+    assert list(r.prices) == ["BTC"] and r.prices["BTC"].currency == "EUR"
+    with pytest.raises(ValueError):
+        client.prices.batch([], "2026-11-10")
+
+
+def test_at_calls_at_route() -> None:
+    client, seen = recording_client({"/v1/prices/BTC/at": fixture("price_at")})
+    p = client.prices.at("BTC", "2026-11-10T12:00:00Z")
+    assert seen[0][1] == "/v1/prices/BTC/at" and seen[0][2]["timestamp"] == "2026-11-10T12:00:00Z"
+    assert p.precision == "DAILY_FALLBACK"

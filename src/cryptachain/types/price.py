@@ -1,78 +1,40 @@
-"""Price response types — v2.3 P11 shape."""
+"""Price response types, as recorded from the live price routes."""
 
 from __future__ import annotations
-
-from datetime import datetime
-from enum import Enum
 
 from pydantic import Field
 
 from cryptachain.types.common import CamelModel
 
 
-class FxSource(str, Enum):
-    """FX rate source."""
-
-    FRANKFURTER_ECB = "FRANKFURTER_ECB"
-    HARDCODED_PEG = "HARDCODED_PEG"
-    USD_BASE = "USD_BASE"
-
-
-class PriceSource(str, Enum):
-    """Price data source."""
-
-    CRYPTAPRICE_VWAP = "CRYPTAPRICE_VWAP"
-    MANUAL_OVERRIDE = "MANUAL_OVERRIDE"
-    STABLECOIN_PEGGED = "STABLECOIN_PEGGED"
-    ZERO_VALUE_IFRS_13_B37 = "ZERO_VALUE_IFRS_13_B37"
-
-
-class FairValueLevel(str, Enum):
-    """IFRS 13 fair value hierarchy level."""
-
-    LEVEL_1 = "LEVEL_1"
-    LEVEL_2 = "LEVEL_2"
-    LEVEL_3 = "LEVEL_3"
-
-
 class PriceResponse(CamelModel):
-    """Price response following v2.3 P11 shape.
+    """Body of ``GET /v1/prices/{symbol}/fair-value`` (and ``/at``, by-contract, one entry of batch).
 
-    Contains the price, FX conversion details, quality metadata,
-    and IFRS fair value level classification.
+    Decimals arrive as JSON numbers; ``fair_value_level`` is 1, 2 or 3 (None when unset).
+    ``close_final`` is FINAL, PROVISIONAL or UNKNOWN; UNKNOWN is never FINAL.
     """
 
-    symbol: str
-    date: str
-    currency: str
     price: float
-    price_usd: float | None = None
-    fx_rate: float | None = None
-    fx_source: FxSource | None = None
+    price_usd: float
+    currency: str
+    fx_rate: float | None = None  # USD per 1 unit of ``currency``; None for USD
+    fx_source: str | None = None  # "ECB" or "PEG"; None for USD
     fx_date: str | None = None
-    source: PriceSource | None = None
-    quality_score: int | None = None  # 0-100
-    fair_value_level: FairValueLevel | None = None
+    date: str
     source_count: int | None = None
-    methodology_version: str | None = None
-    stablecoin_pegged: bool | None = None
-    manual_override: bool | None = None
-    computed_at: datetime | None = None
-
-
-class BatchPriceRequest(CamelModel):
-    """A single item in a batch price request."""
-
-    symbol: str | None = None
-    chain_id: int | None = None
-    address: str | None = None
-    date: str | None = None
-    timestamp: int | None = None
-    currency: str = "USD"
+    quality_score: int | None = None
+    fair_value_level: int | None = None
+    total_volume_usd: float | None = None
+    spread_pct: float | None = None
+    methodology_version: int | None = None
+    revision: int | None = None
+    price_close_zone: str | None = None
+    precision: str | None = None  # DAILY, or DAILY_FALLBACK when no minute price was available
+    close_grade: str | None = None
+    close_final: str | None = None
 
 
 class BatchPriceResponse(CamelModel):
-    """Response from the batch price endpoint."""
+    """``GET /v1/prices/batch``: prices by requested symbol. A symbol with no price on that date is absent."""
 
-    results: list[PriceResponse] = Field(default_factory=list)
-    errors: list[dict] | None = None  # type: ignore[type-arg]
+    prices: dict[str, PriceResponse] = Field(default_factory=dict)

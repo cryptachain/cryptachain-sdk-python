@@ -21,15 +21,11 @@ for fx_rate in history.rates:
 # IAS 21 monthly average (for accounting)
 avg = client.fx.get_monthly_average("EUR", 2026, 4)
 print(f"\nIAS 21 Monthly Average for EUR ({avg.year}-{avg.month:02d}):")
-print(f"  Average rate: {avg.average_rate:.4f}")
-print(f"  Business days: {avg.business_days}/{avg.days_in_month}")
-print(f"  Source: {avg.source}")
+print(f"  Average rate: {avg.avg_rate:.4f}")
+print(f"  Days in the average: {avg.days_in_average}{' (month not finished)' if avg.is_live else ''}")
 
-# List all supported currencies
+# Supported currency codes
 currencies = client.fx.list_currencies()
-print(f"\n{currencies.count} supported currencies:")
-for c in currencies.currencies:
-    peg = f" (pegged to USD @ {c.peg_ratio})" if c.pegged_to_usd else ""
-    print(f"  {c.code} — {c.name}{peg}")
+print(f"\n{currencies.total} supported currencies ({len(currencies.pegged)} pegged): {', '.join(currencies.currencies)}")
 
 client.close()

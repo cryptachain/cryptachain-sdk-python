@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from cryptachain.types.common import CamelModel, Chain
+from cryptachain.types.common import CamelModel
 
 if TYPE_CHECKING:
     from cryptachain.client import AsyncHttpClient, HttpClient
@@ -54,7 +54,7 @@ class HealthResource:
         Returns:
             ServiceStatus with health indicators for all services.
         """
-        data = self._http.get("/v1/status/services")
+        data = self._http.get("/v1/status")
         return ServiceStatus.model_validate(data)
 
     def get_chain_status(self) -> list[ChainStatus]:
@@ -66,16 +66,6 @@ class HealthResource:
         data = self._http.get("/v1/status/chains")
         items = data.get("chains", data) if isinstance(data, dict) else data
         return [ChainStatus.model_validate(c) for c in items]
-
-    def get_chains(self) -> list[Chain]:
-        """List all supported blockchain chains.
-
-        Returns:
-            List of Chain objects with chain IDs and metadata.
-        """
-        data = self._http.get("/v1/chains")
-        items = data.get("chains", data) if isinstance(data, dict) else data
-        return [Chain.model_validate(c) for c in items]
 
     def get_methodology(self) -> Methodology:
         """Get the pricing methodology documentation.
@@ -98,7 +88,7 @@ class AsyncHealthResource:
 
     async def get_system_status(self) -> ServiceStatus:
         """Get overall system health status."""
-        data = await self._http.get("/v1/status/services")
+        data = await self._http.get("/v1/status")
         return ServiceStatus.model_validate(data)
 
     async def get_chain_status(self) -> list[ChainStatus]:
@@ -106,12 +96,6 @@ class AsyncHealthResource:
         data = await self._http.get("/v1/status/chains")
         items = data.get("chains", data) if isinstance(data, dict) else data
         return [ChainStatus.model_validate(c) for c in items]
-
-    async def get_chains(self) -> list[Chain]:
-        """List all supported blockchain chains."""
-        data = await self._http.get("/v1/chains")
-        items = data.get("chains", data) if isinstance(data, dict) else data
-        return [Chain.model_validate(c) for c in items]
 
     async def get_methodology(self) -> Methodology:
         """Get the pricing methodology documentation."""

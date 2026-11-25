@@ -54,16 +54,6 @@ MOCK_NATIVE_BALANCE = {
     "priceUsd": 3000.0,
 }
 
-MOCK_SUMMARY = {
-    "address": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
-    "chainId": 1,
-    "totalTransactions": 5000,
-    "firstSeen": "2020-01-01T00:00:00Z",
-    "lastSeen": "2026-04-04T12:00:00Z",
-    "totalValueUsd": 100000.0,
-    "isContract": False,
-}
-
 
 class TestWalletResource:
     """Test suite for wallet operations."""
@@ -145,17 +135,6 @@ class TestWalletResource:
         )
         result = client.wallets.get_native_transfers("0xABC", chain="ethereum")
         assert len(result.items) == 1
-
-    def test_get_summary(self) -> None:
-        """get_summary returns WalletSummary."""
-        client = create_test_client(
-            {
-                "/v1/wallets/0xABC/summary": MOCK_SUMMARY,
-            }
-        )
-        result = client.wallets.get_summary("0xABC", chain="ethereum")
-        assert result.total_transactions == 5000
-        assert result.is_contract is False
 
     def test_iter_pagination(self) -> None:
         """iter_all_transfers handles multi-page pagination."""

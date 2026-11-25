@@ -88,16 +88,12 @@ class FxResource:
         Returns:
             FxMonthlyAverageResponse with the average rate and metadata.
         """
-        params: dict[str, Any] = {
-            "currency": currency,
-            "year": year,
-            "month": month,
-        }
+        params: dict[str, Any] = {"currency": currency, "month": f"{year:04d}-{month:02d}"}
         data = self._http.get("/v1/fx/monthly-average", params=params)
         return FxMonthlyAverageResponse.model_validate(data)
 
     def list_currencies(self) -> CurrenciesResponse:
-        """List all supported currencies (36 total).
+        """List all supported currencies .
 
         Returns:
             CurrenciesResponse with currency details and count.
@@ -151,11 +147,7 @@ class AsyncFxResource:
         month: int,
     ) -> FxMonthlyAverageResponse:
         """Get the IAS 21 monthly average FX rate."""
-        params: dict[str, Any] = {
-            "currency": currency,
-            "year": year,
-            "month": month,
-        }
+        params: dict[str, Any] = {"currency": currency, "month": f"{year:04d}-{month:02d}"}
         data = await self._http.get("/v1/fx/monthly-average", params=params)
         return FxMonthlyAverageResponse.model_validate(data)
 

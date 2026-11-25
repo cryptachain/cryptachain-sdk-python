@@ -20,12 +20,7 @@ with CryptaChain(api_key="your-api-key") as client:
     status = client.health.get_system_status()
     print(f"\nAPI status: {status.status}")
 
-    # List supported chains
-    chains = client.health.get_chains()
-    print(f"\nSupported chains ({len(chains)}):")
-    for chain in chains[:5]:
-        print(f"  {chain.name} (ID: {chain.chain_id})")
 
     # Get token metadata
     btc = client.tokens.get_metadata("BTC")
-    print(f"\nBTC market cap: ${btc.market_cap_usd:,.0f}")
+    print(f"\nBTC: {btc.name} ({btc.category})")
