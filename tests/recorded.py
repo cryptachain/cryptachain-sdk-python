@@ -29,7 +29,11 @@ def recording_client(routes: dict[str, object]):
     config = Config(api_key="test-key", base_url="https://api.cryptachain.com")
     http = HttpClient.__new__(HttpClient)
     http._config = config
-    http._client = httpx.Client(base_url=config.base_url, headers=config.get_headers(), transport=httpx.MockTransport(handler))
+    http._client = httpx.Client(
+        base_url=config.base_url,
+        headers=config.get_headers(),
+        transport=httpx.MockTransport(handler),
+    )
     client = CryptaChain.__new__(CryptaChain)
     client._config = config
     client._http = http
@@ -40,6 +44,7 @@ def recording_client(routes: dict[str, object]):
     from cryptachain.resources.screening import ScreeningResource
     from cryptachain.resources.tokens import TokenResource
     from cryptachain.resources.wallets import WalletResource
+
     client.prices = PriceResource(http)
     client.fx = FxResource(http)
     client.tokens = TokenResource(http)

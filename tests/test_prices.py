@@ -11,7 +11,12 @@ def test_by_symbol_calls_fair_value_route() -> None:
     client, seen = recording_client({"/v1/prices/BTC/fair-value": fixture("price_usd")})
     p = client.prices.by_symbol("BTC", date="2026-11-10")
     assert seen == [("GET", "/v1/prices/BTC/fair-value", {"currency": "USD", "date": "2026-11-10"})]
-    assert p.currency == "USD" and p.fair_value_level == 1 and p.close_final == "UNKNOWN" and p.fx_rate is None
+    assert (
+        p.currency == "USD"
+        and p.fair_value_level == 1
+        and p.close_final == "UNKNOWN"
+        and p.fx_rate is None
+    )
 
 
 def test_currency_returns_fx_fields() -> None:
@@ -38,7 +43,13 @@ def test_by_contract_uses_chain_slug() -> None:
 def test_batch_is_a_get_with_symbols_and_returns_a_map() -> None:
     client, seen = recording_client({"/v1/prices/batch": fixture("price_batch")})
     r = client.prices.batch(["BTC", "NOPE"], "2026-11-10", currency="EUR")
-    assert seen == [("GET", "/v1/prices/batch", {"symbols": "BTC,NOPE", "date": "2026-11-10", "currency": "EUR"})]
+    assert seen == [
+        (
+            "GET",
+            "/v1/prices/batch",
+            {"symbols": "BTC,NOPE", "date": "2026-11-10", "currency": "EUR"},
+        )
+    ]
     assert list(r.prices) == ["BTC"] and r.prices["BTC"].currency == "EUR"
     with pytest.raises(ValueError):
         client.prices.batch([], "2026-11-10")

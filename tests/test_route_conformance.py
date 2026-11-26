@@ -13,7 +13,11 @@ H = "0x" + "ab" * 32
 
 def _routes() -> list[tuple[str, re.Pattern[str]]]:
     out = []
-    for line in (Path(__file__).parent / "fixtures" / "server-routes.txt").read_text(encoding="utf-8").split("\n"):
+    for line in (
+        (Path(__file__).parent / "fixtures" / "server-routes.txt")
+        .read_text(encoding="utf-8")
+        .split("\n")
+    ):
         if line.strip():
             method, path = line.split(" ")
             out.append((method, re.compile("^" + re.sub(r"\{[^/}]+\}", "[^/]+", path) + "$")))
@@ -56,5 +60,7 @@ def test_every_sdk_request_is_a_served_route() -> None:
             pass
     assert len(seen) == len(calls)
     routes = _routes()
-    unknown = [f"{m} {p}" for m, p, _ in seen if not any(m == rm and rx.match(p) for rm, rx in routes)]
+    unknown = [
+        f"{m} {p}" for m, p, _ in seen if not any(m == rm and rx.match(p) for rm, rx in routes)
+    ]
     assert unknown == [], f"SDK calls routes the API does not serve: {unknown}"

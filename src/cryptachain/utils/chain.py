@@ -78,13 +78,44 @@ def resolve_chain(chain: str | int) -> str:
 
 # Slugs the API accepts (the API's own chain registry), keyed by numeric chain id.
 _ID_TO_SLUG: dict[int, str] = {
-    1: "ethereum", 61: "ethereum-classic", 56: "bsc", 137: "polygon", 42161: "arbitrum", 10: "optimism",
-    8453: "base", 43114: "avalanche", 250: "fantom", 100: "gnosis", 42220: "celo", 59144: "linea",
-    534352: "scroll", 324: "zksync", 1101: "polygon-zkevm", 5000: "mantle", 81457: "blast", 34443: "mode",
-    169: "manta", 1284: "moonbeam", 1285: "moonriver", 25: "cronos", 1313161554: "aurora",
-    1666600000: "harmony", 1088: "metis", 288: "boba", 2222: "kava", 7700: "canto", 7777777: "zora",
-    185: "mint", 2818: "morph", 1135: "lisk", 1868: "soneium", 480: "world-chain", 13371: "immutable-zkevm",
-    57073: "ink", 60808: "bob", 0: "bitcoin",
+    1: "ethereum",
+    61: "ethereum-classic",
+    56: "bsc",
+    137: "polygon",
+    42161: "arbitrum",
+    10: "optimism",
+    8453: "base",
+    43114: "avalanche",
+    250: "fantom",
+    100: "gnosis",
+    42220: "celo",
+    59144: "linea",
+    534352: "scroll",
+    324: "zksync",
+    1101: "polygon-zkevm",
+    5000: "mantle",
+    81457: "blast",
+    34443: "mode",
+    169: "manta",
+    1284: "moonbeam",
+    1285: "moonriver",
+    25: "cronos",
+    1313161554: "aurora",
+    1666600000: "harmony",
+    1088: "metis",
+    288: "boba",
+    2222: "kava",
+    7700: "canto",
+    7777777: "zora",
+    185: "mint",
+    2818: "morph",
+    1135: "lisk",
+    1868: "soneium",
+    480: "world-chain",
+    13371: "immutable-zkevm",
+    57073: "ink",
+    60808: "bob",
+    0: "bitcoin",
 }
 _SLUGS = set(_ID_TO_SLUG.values())
 
@@ -99,7 +130,9 @@ def resolve_chain_slug(chain: str | int) -> str:
         chain_id = int(chain)
         slug = _ID_TO_SLUG.get(chain_id)
         if slug is None:
-            raise ValueError(f"Unknown chain id {chain_id}: pass the chain slug (for example 'ethereum')")
+            raise ValueError(
+                f"Unknown chain id {chain_id}: pass the chain slug (for example 'ethereum')"
+            )
         return slug
     name = str(chain).strip().lower()
     if name in _SLUGS:

@@ -28,7 +28,9 @@ class ScreeningResource:
 
     def screen_address(self, address: str, *, chain: str | int = 1) -> ScreeningResult:
         """Screen a single address. ``chain`` is a slug (``"ethereum"``) or a known chain id."""
-        data = self._http.post("/v1/screen/address", json={"address": address, "chain": resolve_chain_slug(chain)})
+        data = self._http.post(
+            "/v1/screen/address", json={"address": address, "chain": resolve_chain_slug(chain)}
+        )
         return ScreeningResult.model_validate(data)
 
     def screen_bulk(self, addresses: list[dict[str, Any]]) -> list[ScreeningResult]:
@@ -44,7 +46,9 @@ class AsyncScreeningResource:
         self._http = http
 
     async def screen_address(self, address: str, *, chain: str | int = 1) -> ScreeningResult:
-        data = await self._http.post("/v1/screen/address", json={"address": address, "chain": resolve_chain_slug(chain)})
+        data = await self._http.post(
+            "/v1/screen/address", json={"address": address, "chain": resolve_chain_slug(chain)}
+        )
         return ScreeningResult.model_validate(data)
 
     async def screen_bulk(self, addresses: list[dict[str, Any]]) -> list[ScreeningResult]:

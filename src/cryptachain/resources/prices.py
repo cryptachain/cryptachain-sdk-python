@@ -32,7 +32,11 @@ def _iso(timestamp: str | int | datetime) -> str:
 def _batch(symbols: list[str], date: date_type | str, currency: str) -> tuple[str, dict[str, Any]]:
     if not 1 <= len(symbols) <= 500:
         raise ValueError("batch takes 1 to 500 symbols")
-    return "/v1/prices/batch", {"symbols": ",".join(symbols), "date": str(date), "currency": currency}
+    return "/v1/prices/batch", {
+        "symbols": ",".join(symbols),
+        "date": str(date),
+        "currency": currency,
+    }
 
 
 def _batch_result(data: dict[str, Any]) -> BatchPriceResponse:
@@ -45,27 +49,43 @@ class PriceResource:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def by_symbol(self, symbol: str, *, date: date_type | str | None = None, currency: str = "USD") -> PriceResponse:
+    def by_symbol(
+        self, symbol: str, *, date: date_type | str | None = None, currency: str = "USD"
+    ) -> PriceResponse:
         """``GET /v1/prices/{symbol}/fair-value`` (latest day when ``date`` is omitted)."""
         data = self._http.get(f"/v1/prices/{symbol}/fair-value", params=_day_params(date, currency))
         return PriceResponse.model_validate(data)
 
     def by_contract(
-        self, chain: str | int, address: str, *, date: date_type | str | None = None, currency: str = "USD"
+        self,
+        chain: str | int,
+        address: str,
+        *,
+        date: date_type | str | None = None,
+        currency: str = "USD",
     ) -> PriceResponse:
         """``GET /v1/prices/by-contract/{chain}/{address}/fair-value``; ``chain`` is a slug or a known chain id."""
         slug = resolve_chain_slug(chain)
-        data = self._http.get(f"/v1/prices/by-contract/{slug}/{address}/fair-value", params=_day_params(date, currency))
+        data = self._http.get(
+            f"/v1/prices/by-contract/{slug}/{address}/fair-value",
+            params=_day_params(date, currency),
+        )
         return PriceResponse.model_validate(data)
 
-    def batch(self, symbols: list[str], date: date_type | str, *, currency: str = "USD") -> BatchPriceResponse:
+    def batch(
+        self, symbols: list[str], date: date_type | str, *, currency: str = "USD"
+    ) -> BatchPriceResponse:
         """``GET /v1/prices/batch``: up to 500 symbols for one date. Symbols with no price are absent."""
         path, params = _batch(symbols, date, currency)
         return _batch_result(self._http.get(path, params=params))
 
-    def at(self, symbol: str, timestamp: str | int | datetime, *, currency: str = "USD") -> PriceResponse:
+    def at(
+        self, symbol: str, timestamp: str | int | datetime, *, currency: str = "USD"
+    ) -> PriceResponse:
         """``GET /v1/prices/{symbol}/at``: price at an ISO-8601 timestamp (daily fallback when no minute price)."""
-        data = self._http.get(f"/v1/prices/{symbol}/at", params={"timestamp": _iso(timestamp), "currency": currency})
+        data = self._http.get(
+            f"/v1/prices/{symbol}/at", params={"timestamp": _iso(timestamp), "currency": currency}
+        )
         return PriceResponse.model_validate(data)
 
 
@@ -75,21 +95,39 @@ class AsyncPriceResource:
     def __init__(self, http: AsyncHttpClient) -> None:
         self._http = http
 
-    async def by_symbol(self, symbol: str, *, date: date_type | str | None = None, currency: str = "USD") -> PriceResponse:
-        data = await self._http.get(f"/v1/prices/{symbol}/fair-value", params=_day_params(date, currency))
+    async def by_symbol(
+        self, symbol: str, *, date: date_type | str | None = None, currency: str = "USD"
+    ) -> PriceResponse:
+        data = await self._http.get(
+            f"/v1/prices/{symbol}/fair-value", params=_day_params(date, currency)
+        )
         return PriceResponse.model_validate(data)
 
     async def by_contract(
-        self, chain: str | int, address: str, *, date: date_type | str | None = None, currency: str = "USD"
+        self,
+        chain: str | int,
+        address: str,
+        *,
+        date: date_type | str | None = None,
+        currency: str = "USD",
     ) -> PriceResponse:
         slug = resolve_chain_slug(chain)
-        data = await self._http.get(f"/v1/prices/by-contract/{slug}/{address}/fair-value", params=_day_params(date, currency))
+        data = await self._http.get(
+            f"/v1/prices/by-contract/{slug}/{address}/fair-value",
+            params=_day_params(date, currency),
+        )
         return PriceResponse.model_validate(data)
 
-    async def batch(self, symbols: list[str], date: date_type | str, *, currency: str = "USD") -> BatchPriceResponse:
+    async def batch(
+        self, symbols: list[str], date: date_type | str, *, currency: str = "USD"
+    ) -> BatchPriceResponse:
         path, params = _batch(symbols, date, currency)
         return _batch_result(await self._http.get(path, params=params))
 
-    async def at(self, symbol: str, timestamp: str | int | datetime, *, currency: str = "USD") -> PriceResponse:
-        data = await self._http.get(f"/v1/prices/{symbol}/at", params={"timestamp": _iso(timestamp), "currency": currency})
+    async def at(
+        self, symbol: str, timestamp: str | int | datetime, *, currency: str = "USD"
+    ) -> PriceResponse:
+        data = await self._http.get(
+            f"/v1/prices/{symbol}/at", params={"timestamp": _iso(timestamp), "currency": currency}
+        )
         return PriceResponse.model_validate(data)

@@ -96,6 +96,7 @@ class BlockchainResource:
         items = data.get("logs", data) if isinstance(data, dict) else data
         return [LogEntry.model_validate(log) for log in items]
 
+
 class AsyncBlockchainResource:
     """Asynchronous blockchain data operations.
 
